@@ -2,6 +2,12 @@ use anchor_lang::prelude::*;
 
 #[error_code]
 pub enum ErrorCode {
-    #[msg("Custom error message")]
-    CustomError,
+    #[msg("Transaction must include a flash_repay instruction")]
+    MissingRepayInstruction,
+    #[msg("Transaction must include a flash_loan instruction")]
+    MissingLoanInstruction,
+    #[msg("Insufficient funds in vault")]
+    InsufficientVaultBalance,
+    #[msg("Arithmetic overflow")]
+    Overflow,
 }

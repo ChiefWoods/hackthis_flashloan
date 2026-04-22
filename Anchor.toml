@@ -5,12 +5,12 @@ package_manager = "yarn"
 resolution = true
 skip-lint = false
 
-[programs.localnet]
-flashloan = "DtzrtfA92R7zvHxSpPhg5mCiVDBgwGfCkuPKcD23Sio"
+[programs.devnet]
+flashloan = "FsLos6rnXoPrhjTrW4qfiypcy47WrJRibZXBJGMDy8iD"
 
 [provider]
-cluster = "localnet"
-wallet = "~/.config/solana/id.json"
+cluster = "devnet"
+wallet = "keys/ANDYPEbY29yk7y93V4DJTxnEqHe9AnSHtMKyXaNd8Dgi.json"
 
 [scripts]
 test = "cargo test"

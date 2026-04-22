@@ -1,0 +1,59 @@
+use anchor_lang::prelude::*;
+use solana_instructions_sysvar::{
+    load_current_index_checked, load_instruction_at_checked, ID as SYSVAR_INSTRUCTIONS_ID,
+};
+use crate::{constants::{FLASH_REPAY_DISCRIMINATOR}, error::ErrorCode, Vault, VAULT_SEED};
+
+#[derive(Accounts)]
+pub struct FlashLoan<'info> {
+    #[account(
+        mut,
+        seeds = [VAULT_SEED],
+        bump = vault.bump,
+    )]
+    pub vault: Account<'info, Vault>,
+    /// CHECK: This account receives the loan funds
+    #[account(mut)]
+    pub borrower: UncheckedAccount<'info>,
+    /// CHECK: Instructions sysvar, verified by address constraint
+    #[account(address = SYSVAR_INSTRUCTIONS_ID)]
+    pub instructions: UncheckedAccount<'info>,
+}
+
+pub(crate) fn handler(ctx: Context<FlashLoan>, amount: u64) -> Result<()> {
+    let ixs = ctx.accounts.instructions.to_account_info();
+    let current_index = load_current_index_checked(&ixs)? as usize;
+
+    // Verify a flash_repay instruction from this program exists later in the tx
+    let mut found_repay = false;
+    let mut idx = current_index + 1;
+    loop {
+        match load_instruction_at_checked(idx, &ixs) {
+            Ok(ix) => {
+                if ix.program_id == crate::id()
+                    && ix.data.len() >= 8
+                    && ix.data[..8] == FLASH_REPAY_DISCRIMINATOR
+                {
+                    found_repay = true;
+                    break;
+                }
+                idx += 1;
+            }
+            Err(_) => break,
+        }
+    }
+    require!(found_repay, ErrorCode::MissingRepayInstruction);
+
+    // Transfer loan amount from vault to borrower via direct lamport manipulation.
+    // Vault is program-owned, so we can mutate its lamports without a CPI.
+    let vault_info = ctx.accounts.vault.to_account_info();
+    let borrower_info = ctx.accounts.borrower.to_account_info();
+    require!(
+        vault_info.lamports() >= amount,
+        ErrorCode::InsufficientVaultBalance
+    );
+    **vault_info.try_borrow_mut_lamports()? -= amount;
+    **borrower_info.try_borrow_mut_lamports()? += amount;
+
+    Ok(())
+}
