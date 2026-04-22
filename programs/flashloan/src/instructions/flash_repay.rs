@@ -43,7 +43,7 @@ pub(crate) fn handler(ctx: Context<FlashRepay>) -> Result<()> {
         }
     }
 
-    let amount = loan_amount.ok_or(ErrorCode::MissingLoanInstruction)?;
+    let amount = loan_amount.unwrap_or(0);
     let repay_amount = amount.checked_add(FLASH_LOAN_FEE).ok_or(ErrorCode::Overflow)?;
 
     // Transfer principal + fee from borrower back to vault
