@@ -28,16 +28,13 @@ pub(crate) fn handler(ctx: Context<FlashLoan>, amount: u64) -> Result<()> {
     // A second flash_loan in the same tx could drain the vault by sharing a single flash_repay
     // that only repays the smaller of the two loans.
     let mut found_repay = false;
-    let mut idx = 0usize;
+    let mut idx = current_index+1;
     loop {
         match load_instruction_at_checked(idx, &ixs) {
             Ok(ix) => {
                 if ix.program_id == crate::id() && ix.data.len() >= 8 {
                     let disc = &ix.data[..8];
-                    if idx != current_index && disc == FLASH_LOAN_DISCRIMINATOR {
-                        return Err(ErrorCode::MultipleLoansNotAllowed.into());
-                    }
-                    if idx > current_index && disc == FLASH_REPAY_DISCRIMINATOR {
+                    if disc == FLASH_REPAY_DISCRIMINATOR {
                         found_repay = true;
                     }
                 }

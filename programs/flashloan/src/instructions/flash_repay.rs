@@ -29,7 +29,7 @@ pub(crate) fn handler(ctx: Context<FlashRepay>) -> Result<()> {
     let current_index = load_current_index_checked(&ixs)? as usize;
 
     // Find the flash_loan instruction that precedes this repay.
-    // If multiple exist, the last one wins (each tx should have one loan/repay pair).
+    // If multiple exist, ERROR!
     let mut loan_amount: Option<u64> = None;
     for idx in 0..current_index {
         if let Ok(ix) = load_instruction_at_checked(idx, &ixs) {
@@ -37,13 +37,16 @@ pub(crate) fn handler(ctx: Context<FlashRepay>) -> Result<()> {
                 && ix.data.len() >= 16
                 && ix.data[..8] == FLASH_LOAN_DISCRIMINATOR
             {
+                if loan_amount.is_some() {
+                    return Err(ErrorCode::MultipleLoansNotAllowed.into());
+                }
                 // Anchor encodes instruction arguments as little-endian borsh after the 8-byte discriminator
                 loan_amount = Some(u64::from_le_bytes(ix.data[8..16].try_into().unwrap()));
             }
         }
     }
 
-    let amount = loan_amount.unwrap_or(0);
+    let amount = loan_amount.ok_or(ErrorCode::MissingLoanInstruction)?;
     let repay_amount = amount.checked_add(FLASH_LOAN_FEE).ok_or(ErrorCode::Overflow)?;
 
     // Transfer principal + fee from borrower back to vault
