@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use solana_instructions_sysvar::{
     load_current_index_checked, load_instruction_at_checked, ID as SYSVAR_INSTRUCTIONS_ID,
 };
-use crate::{constants::{FLASH_LOAN_DISCRIMINATOR, FLASH_REPAY_DISCRIMINATOR}, error::ErrorCode, Vault, VAULT_SEED};
+use crate::{constants::{FLASH_REPAY_DISCRIMINATOR}, error::ErrorCode, Vault, VAULT_SEED};
 
 #[derive(Accounts)]
 pub struct FlashLoan<'info> {
