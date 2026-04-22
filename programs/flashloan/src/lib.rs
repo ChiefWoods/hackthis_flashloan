@@ -26,4 +26,8 @@ pub mod flashloan {
     pub fn flash_repay(ctx: Context<FlashRepay>) -> Result<()> {
         instructions::flash_repay::handler(ctx)
     }
+
+    pub fn log_balance(ctx: Context<LogBalance>) -> Result<()> {
+        instructions::log_balance::handler(ctx)
+    }
 }

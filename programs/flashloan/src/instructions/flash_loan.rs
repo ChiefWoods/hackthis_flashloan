@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use solana_instructions_sysvar::{
     load_current_index_checked, load_instruction_at_checked, ID as SYSVAR_INSTRUCTIONS_ID,
 };
-use crate::{constants::{FLASH_REPAY_DISCRIMINATOR}, error::ErrorCode, Vault, VAULT_SEED};
+use crate::{constants::{FLASH_LOAN_DISCRIMINATOR, FLASH_REPAY_DISCRIMINATOR}, error::ErrorCode, Vault, VAULT_SEED};
 
 #[derive(Accounts)]
 pub struct FlashLoan<'info> {
@@ -24,18 +24,22 @@ pub(crate) fn handler(ctx: Context<FlashLoan>, amount: u64) -> Result<()> {
     let ixs = ctx.accounts.instructions.to_account_info();
     let current_index = load_current_index_checked(&ixs)? as usize;
 
-    // Verify a flash_repay instruction from this program exists later in the tx
+    // Scan all instructions: reject any other flash_loan, require a flash_repay after this one.
+    // A second flash_loan in the same tx could drain the vault by sharing a single flash_repay
+    // that only repays the smaller of the two loans.
     let mut found_repay = false;
-    let mut idx = current_index + 1;
+    let mut idx = 0usize;
     loop {
         match load_instruction_at_checked(idx, &ixs) {
             Ok(ix) => {
-                if ix.program_id == crate::id()
-                    && ix.data.len() >= 8
-                    && ix.data[..8] == FLASH_REPAY_DISCRIMINATOR
-                {
-                    found_repay = true;
-                    break;
+                if ix.program_id == crate::id() && ix.data.len() >= 8 {
+                    let disc = &ix.data[..8];
+                    if idx != current_index && disc == FLASH_LOAN_DISCRIMINATOR {
+                        return Err(ErrorCode::MultipleLoansNotAllowed.into());
+                    }
+                    if idx > current_index && disc == FLASH_REPAY_DISCRIMINATOR {
+                        found_repay = true;
+                    }
                 }
                 idx += 1;
             }

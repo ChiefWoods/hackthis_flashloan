@@ -10,4 +10,6 @@ pub enum ErrorCode {
     InsufficientVaultBalance,
     #[msg("Arithmetic overflow")]
     Overflow,
+    #[msg("Only one flash_loan is allowed per transaction")]
+    MultipleLoansNotAllowed,
 }
