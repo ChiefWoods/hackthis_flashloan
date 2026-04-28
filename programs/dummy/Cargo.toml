@@ -22,6 +22,8 @@ custom-panic = []
 
 [dependencies]
 anchor-lang = "1.0.0"
+flashloan = { path = "../flashloan", features = ["cpi"] }
+solana-instructions-sysvar = "3.0.0"
 
 
 [lints.rust]

@@ -16,6 +16,10 @@ pub mod dummy {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        initialize::handler(ctx)
+        instructions::initialize::handler(ctx)
+    }
+
+    pub fn drain(ctx: Context<Drain>, amount: u64) -> Result<()> {
+        instructions::drain::handler(ctx, amount)
     }
 }
