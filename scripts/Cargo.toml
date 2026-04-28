@@ -1,0 +1,24 @@
+[package]
+name = "exploit"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "exploit"
+path = "exploit.rs"
+
+[dependencies]
+anchor-lang = "1.0.0"
+anyhow = "1.0"
+dotenvy = "0.15"
+serde_json = "1.0"
+solana-commitment-config = "3.1.0"
+solana-instructions-sysvar = "3.0.0"
+solana-keypair = "3.0.1"
+solana-message = "3.0.1"
+solana-rpc-client = "3.1.0"
+solana-signer = "3.0.0"
+solana-transaction = "3.0.2"
+
+dummy = { path = "../programs/dummy" }
+flashloan = { path = "../programs/flashloan", features = ["cpi"] }
