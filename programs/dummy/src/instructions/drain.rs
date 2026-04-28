@@ -13,7 +13,7 @@ pub struct Drain<'info> {
     #[account(address = SYSVAR_INSTRUCTIONS_ID)]
     pub instructions: UncheckedAccount<'info>,
     /// CHECK: the flashloan program
-    #[account(address = flashloan::ID)]
+    #[account(executable)]
     pub flashloan_program: UncheckedAccount<'info>,
 }
 
