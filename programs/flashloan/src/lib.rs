@@ -9,7 +9,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("FsLos6rnXoPrhjTrW4qfiypcy47WrJRibZXBJGMDy8iD");
+declare_id!("CU7WqY6gXRC86TFd97ioJxR3QJbmwDXF2DRGPWLw6sEs");
 
 #[program]
 pub mod flashloan {

@@ -6,7 +6,8 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-flashloan = "FsLos6rnXoPrhjTrW4qfiypcy47WrJRibZXBJGMDy8iD"
+dummy = "BMSDHjY74HZAknfMBvNF6fjVStM1pPe5hiVhQqDwSFfw"
+flashloan = "4j61cgEWFvVyMhdLJz9wLpuEnny8UBcva5wDNqYbWdn1"
 
 [provider]
 cluster = "devnet"
