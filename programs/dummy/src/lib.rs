@@ -19,7 +19,7 @@ pub mod dummy {
         instructions::initialize::handler(ctx)
     }
 
-    pub fn drain(ctx: Context<Drain>, amount: u64) -> Result<()> {
-        instructions::drain::handler(ctx, amount)
+    pub fn drain(ctx: Context<Drain>) -> Result<()> {
+        instructions::drain::handler(ctx)
     }
 }

